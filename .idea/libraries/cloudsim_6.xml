@@ -1,0 +1,14 @@
+<component name="libraryTable">
+  <library name="cloudsim-6">
+    <CLASSES>
+      <root url="file://$USER_HOME$/Desktop/cloudsim-6.0-pre" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="file://$USER_HOME$/Desktop/cloudsim-6.0-pre/buildSrc/build/groovy-dsl-plugins/output/adapter-src" />
+      <root url="file://$USER_HOME$/Desktop/cloudsim-6.0-pre/modules/cloudsim-examples/src/main/java" />
+      <root url="file://$USER_HOME$/Desktop/cloudsim-6.0-pre/modules/cloudsim/src/main/java" />
+      <root url="file://$USER_HOME$/Desktop/cloudsim-6.0-pre/modules/cloudsim/src/test/java" />
+    </SOURCES>
+  </library>
+</component>
