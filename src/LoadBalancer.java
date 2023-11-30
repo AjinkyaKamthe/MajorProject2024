@@ -1,27 +1,23 @@
 import java.util.*;
 
-import FCFS.fcfs;
 import SJF.sjf;
 
 import org.cloudbus.cloudsim.*;
 import org.cloudbus.cloudsim.core.CloudSim;
-import org.cloudbus.cloudsim.provisioners.BwProvisionerSimple;
-import org.cloudbus.cloudsim.provisioners.PeProvisionerSimple;
-import org.cloudbus.cloudsim.provisioners.RamProvisionerSimple;
+import org.cloudbus.cloudsim.provisioners.*;
 
 public class LoadBalancer {
 
     private static List<Vm> createVM(int userId, int numberOfVm) {
-        //Creates a container to store VMs. This list is passed to the broker later
+        
         LinkedList<Vm> list = new LinkedList<>();
 
-        //VM Parameters
-        long size = 10000; //image size (MB)
-        int ram = 512; //vm memory (MB)
+        long size = 10000; 
+        int ram = 512; 
         int mips = 1000;
         long bw = 1000;
-        int pesNumber = 1; //number of cpus
-        String vmm = "Xen"; //VMM name
+        int pesNumber = 1; 
+        String vmm = "Xen"; 
 
         for(int i = 0; i< numberOfVm; i++){
             Vm vm = new Vm(i, userId, mips+(i*10), pesNumber, ram, bw, size, vmm, new CloudletSchedulerSpaceShared());
@@ -32,10 +28,9 @@ public class LoadBalancer {
     }
 
     private static List<Cloudlet> createCloudlet(int userId, int numberOfCloudlet){
-        // Creates a container to store Cloudlets
+        
         LinkedList<Cloudlet> list = new LinkedList<>();
 
-        //cloudlet parameters
         long length = 1000;
         long fileSize = 300;
         long outputSize = 300;
@@ -52,15 +47,7 @@ public class LoadBalancer {
     }
 
     public static void main(String[] args) {
-        Log.printLine();
-        Log.printLine("===================================== Load Balancer ==================================");
-        Log.printLine("Title:        LoadBalancer" +
-                "\nDescription:  A simulation to identify different approaches in Load Balancing of Cloud Computing" +
-                "\nAuthors:      Ajinkya Dandvate" +
-                "\n              Ajinkya Taranekar" +
-                "\n              Chirayu Mehta" +
-                "\n              Malay Saxena" +
-                "\n              Murtaza Ali");
+        Log.printLine("===================================== Load Balancer ==================================");       
         try {
             Calendar calendar = Calendar.getInstance();
 
@@ -71,7 +58,6 @@ public class LoadBalancer {
             Log.printLine("Enter number of grid users:");
             int numUsers = scanner.nextInt();
             
-            // Initialize the CloudSim library
             CloudSim.init(numUsers, calendar, false);
 
             Log.printLine();
@@ -86,11 +72,8 @@ public class LoadBalancer {
             Log.printLine();
             Log.printLine("Third step: Create Broker");
             Log.printLine("Select method for LoadBalancing:" +
-                    "\n1. Round Robin" +
-                    "\n2. Shortest Job First" +
-                    "\n3. First Come First Serve" +
-                    "\n4. Genetic Algorithm"+
-                    "\n5. Priority");
+                    
+                    "\n1. Shortest Job First" );
 
             DatacenterBroker broker = null;
             boolean gotBroker = false;
@@ -100,27 +83,12 @@ public class LoadBalancer {
                 try {
                     switch (option) {
                         case 1 :
-                            broker = new RoundRobinDatacenterBroker("Broker");
+                            broker = new sjf("Broker");
                             gotBroker = true;
                             break;
-                        case 2 :
-                            broker = new ShortestJobFirstDatacenterBroker("Broker");
-                            gotBroker = true;
-                            break;
-                        case 3 :
-                            broker = new FCFSDatacenterBroker("Broker");
-                            gotBroker = true;
-                            break;
-                        case 4 :
-                            broker = new GeneticAlgorithmDatacenterBroker("Broker");
-                            gotBroker = true;
-                            break;
-                        case 5 :
-                            broker = new PriorityDatacenterBroker("Broker");
-                            gotBroker = true;
-                            break;
+                        
                         default:
-                            Log.printLine("Please, select from [1-] only:");
+                            Log.printLine("Please, select from [1] only:");
                             break;
                     }
                 } catch (Exception e) {
@@ -178,35 +146,26 @@ public class LoadBalancer {
 
     private static Datacenter createDatacenter(String name){
 
-        // Here are the steps needed to create a PowerDatacenter:
-        // 1. We need to create a list to store one or more
-        //    Machines
         List<Host> hostList = new ArrayList<>();
 
-        // 2. A Machine contains one or more PEs or CPUs/Cores. Therefore, should
-        //    create a list to store these PEs before creating
-        //    a Machine.
         List<Pe> peList1 = new ArrayList<>();
 
         int mips = 10000;
 
-        // 3. Create PEs and add these into the list.
-        //for a quad-core machine, a list of 4 PEs is required:
-        peList1.add(new Pe(0, new PeProvisionerSimple(mips + 500))); // need to store Pe id and MIPS Rating
+        peList1.add(new Pe(0, new PeProvisionerSimple(mips + 500))); 
         peList1.add(new Pe(1, new PeProvisionerSimple(mips + 1000)));
         peList1.add(new Pe(2, new PeProvisionerSimple(mips + 1500)));
         peList1.add(new Pe(3, new PeProvisionerSimple(mips + 700)));
 
-        //Another list, for a dual-core machine
+     
         List<Pe> peList2 = new ArrayList<>();
 
         peList2.add(new Pe(0, new PeProvisionerSimple(mips + 700)));
         peList2.add(new Pe(1, new PeProvisionerSimple(mips + 900)));
 
-        //4. Create Hosts with its id and list of PEs and add them to the list of machines
         int hostId=0;
-        int ram = 1002048; //host memory (MB)
-        long storage = 1000000; //host storage
+        int ram = 1002048; 
+        long storage = 1000000; 
         int bw = 10000;
 
         hostList.add(
@@ -218,7 +177,7 @@ public class LoadBalancer {
                         peList1,
                         new VmSchedulerTimeShared(peList1)
                 )
-        ); // This is our first machine
+        ); 
 
         hostId++;
 
@@ -232,21 +191,19 @@ public class LoadBalancer {
                         new VmSchedulerTimeShared(peList2)
                 )
         ); 
-        String arch = "x86";      // system architecture
-        String os = "Linux";          // operating system
+        String arch = "x86";      
+        String os = "Linux";         
         String vmm = "Xen";
-        double time_zone = 10.0;         // time zone this resource located
-        double cost = 3.0;              // the cost of using processing in this resource
-        double costPerMem = 0.05;		// the cost of using memory in this resource
-        double costPerStorage = 0.1;	// the cost of using storage in this resource
-        double costPerBw = 0.1;			// the cost of using bw in this resource
-        LinkedList<Storage> storageList = new LinkedList<>();	//we are not adding SAN devices by now
+        double time_zone = 10.0;         
+        double cost = 3.0;              
+        double costPerMem = 0.05;		
+        double costPerStorage = 0.1;	
+        double costPerBw = 0.1;			
+        LinkedList<Storage> storageList = new LinkedList<>();	
 
         DatacenterCharacteristics characteristics = new DatacenterCharacteristics(
                 arch, os, vmm, hostList, time_zone, cost, costPerMem, costPerStorage, costPerBw);
 
-
-        // 6. Finally, we need to create a PowerDatacenter object.
         Datacenter datacenter = null;
         try {
             datacenter = new Datacenter(name, characteristics, new VmAllocationPolicySimple(hostList), storageList, 0);
@@ -257,10 +214,6 @@ public class LoadBalancer {
         return datacenter;
     }
 
-    /**
-     * Prints the Cloudlet objects
-     * @param list  list of Cloudlets
-     */
     private static void printCloudletList(List<Cloudlet> list) {
 
         String indent = "    ";

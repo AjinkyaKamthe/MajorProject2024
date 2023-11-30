@@ -4,16 +4,23 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.cloudbus.cloudsim.*;
-import org.cloudbus.cloudsim.core.CloudSim;
-import org.cloudbus.cloudsim.core.CloudSimTags;
-import org.cloudbus.cloudsim.core.SimEvent;
+import org.cloudbus.cloudsim.core.*;
+
 
 public class sjf extends DatacenterBroker {
 
     public sjf(String name) throws Exception {
         super(name);
     }
+    @Override
+    protected void processResourceCharacteristics(SimEvent ev) {
+        DatacenterCharacteristics characteristics = (DatacenterCharacteristics) ev.getData();
+        getDatacenterCharacteristicsList().put(characteristics.getId(), characteristics);
 
+        if (getDatacenterCharacteristicsList().size() == getDatacenterIdsList().size()) {
+            distributeRequestsForNewVmsAcrossDatacenters();
+        }
+    }
 
     public void scheduleTaskstoVms() {
         int reqTasks = cloudletList.size();
@@ -45,19 +52,6 @@ public class sjf extends DatacenterBroker {
         setCloudletReceivedList(List.of(list));
     }
 
-    @Override
-    protected void processCloudletReturn(SimEvent ev) {
-        Cloudlet cloudlet = (Cloudlet) ev.getData();
-        getCloudletReceivedList().add(cloudlet);
-        Log.printLine(CloudSim.clock() + ": " + getName() + ": Cloudlet " + cloudlet.getCloudletId()
-                + " received");
-        cloudletsSubmitted--;
-        if (getCloudletList().size() == 0 && cloudletsSubmitted == 0) {
-            scheduleTaskstoVms();
-            cloudletExecution(cloudlet);
-        }
-    }
-
     protected void cloudletExecution(Cloudlet cloudlet) {
 
         if (getCloudletList().size() == 0 && cloudletsSubmitted == 0) {
@@ -69,16 +63,6 @@ public class sjf extends DatacenterBroker {
                 clearDatacenters();
                 createVmsInDatacenter(0);
             }
-        }
-    }
-
-    @Override
-    protected void processResourceCharacteristics(SimEvent ev) {
-        DatacenterCharacteristics characteristics = (DatacenterCharacteristics) ev.getData();
-        getDatacenterCharacteristicsList().put(characteristics.getId(), characteristics);
-
-        if (getDatacenterCharacteristicsList().size() == getDatacenterIdsList().size()) {
-            distributeRequestsForNewVmsAcrossDatacenters();
         }
     }
 
@@ -102,4 +86,18 @@ public class sjf extends DatacenterBroker {
         setVmsRequested(numberOfVmsAllocated);
         setVmsAcks(0);
     }
+
+    @Override
+    protected void processCloudletReturn(SimEvent ev) {
+        Cloudlet cloudlet = (Cloudlet) ev.getData();
+        getCloudletReceivedList().add(cloudlet);
+        Log.printLine(CloudSim.clock() + ": " + getName() + ": Cloudlet " + cloudlet.getCloudletId()
+                + " received");
+        cloudletsSubmitted--;
+        if (getCloudletList().size() == 0 && cloudletsSubmitted == 0) {
+            scheduleTaskstoVms();
+            cloudletExecution(cloudlet);
+        }
+    }
+
 }
