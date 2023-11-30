@@ -1,5 +1,3 @@
-import java.util.*;
-
 import FCFS.fcfs;
 import SJF.sjf;
 
@@ -9,8 +7,12 @@ import org.cloudbus.cloudsim.provisioners.BwProvisionerSimple;
 import org.cloudbus.cloudsim.provisioners.PeProvisionerSimple;
 import org.cloudbus.cloudsim.provisioners.RamProvisionerSimple;
 
-public class LoadBalancer {
+import java.util.*;
 
+public class LoadBalancerComparison {
+
+    private static List<Map<String, String>> results = new ArrayList<>();
+    
     private static List<Vm> createVM(int userId, int numberOfVm) {
         //Creates a container to store VMs. This list is passed to the broker later
         LinkedList<Vm> list = new LinkedList<>();
@@ -70,104 +72,101 @@ public class LoadBalancer {
             Log.printLine("First step: Initialize the CloudSim package.");
             Log.printLine("Enter number of grid users:");
             int numUsers = scanner.nextInt();
-            
-            // Initialize the CloudSim library
-            CloudSim.init(numUsers, calendar, false);
 
             Log.printLine();
             Log.printLine("Second step: Create Datacenters are the resource providers in CloudSim. We need at list one of them to run a CloudSim simulation.");
             Log.printLine("Enter number of datacenters:");
             int numberOfDatacenters = scanner.nextInt();
 
-            for (int i = 0; i < numberOfDatacenters; i++) {
-                createDatacenter("Datacenter_" + i);
-            }
-
             Log.printLine();
             Log.printLine("Third step: Create Broker");
-            Log.printLine("Select method for LoadBalancing:" +
-                    "\n1. Round Robin" +
-                    "\n2. Shortest Job First" +
-                    "\n3. First Come First Serve" +
-                    "\n4. Genetic Algorithm"+
-                    "\n5. Priority");
 
-            DatacenterBroker broker = null;
-            boolean gotBroker = false;
+            Log.printLine("Enter number of vms:");
+            int numberOfVm = scanner.nextInt();
 
-            while(!gotBroker) {
-                int option = scanner.nextInt();
+            Log.printLine("Enter number of cloudlet");
+            int numberOfCloudlet = scanner.nextInt();
+
+            for (int i = 1; i <= 5 ; i++) {
+                CloudSim.init(numUsers, calendar, true);
+
+                DatacenterBroker broker = null;
                 try {
-                    switch (option) {
-                        case 1 :
-                            broker = new RoundRobinDatacenterBroker("Broker");
-                            gotBroker = true;
+                    switch (i) {
+                        case 1:
+                            broker = new RoundRobinDatacenterBroker("RoundRobinDatacenterBroker");
                             break;
-                        case 2 :
-                            broker = new ShortestJobFirstDatacenterBroker("Broker");
-                            gotBroker = true;
+                        case 2:
+                            broker = new ShortestJobFirstDatacenterBroker("ShortestJobFirstDatacenterBroker");
                             break;
-                        case 3 :
-                            broker = new FCFSDatacenterBroker("Broker");
-                            gotBroker = true;
+                        case 3:
+                            broker = new PriorityDatacenterBroker("PriorityDatacenterBroker");
                             break;
-                        case 4 :
-                            broker = new GeneticAlgorithmDatacenterBroker("Broker");
-                            gotBroker = true;
+                        case 4:
+                            broker = new FCFSDatacenterBroker("FirstComeFirstServeDatacenterBroker");
                             break;
-                        case 5 :
-                            broker = new PriorityDatacenterBroker("Broker");
-                            gotBroker = true;
+                        case 5:
+                            broker = new GeneticAlgorithmDatacenterBroker("GeneticAlgorithmDatacenterBroker");
                             break;
                         default:
-                            Log.printLine("Please, select from [1-] only:");
+                            Log.printLine("Please, select from [1-5] only:");
                             break;
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
+
+                for (int j = 0; j < numberOfDatacenters; j++) {
+                    createDatacenter("Datacenter_" + j);
+                }
+
+                assert broker != null;
+                int brokerId = broker.getId();
+                String brokerName = broker.getName();
+
+                Log.printLine("Broker: " + brokerName);
+                Log.printLine("Create VMs");
+
+                List<Vm> vmList = createVM(brokerId, numberOfVm);
+
+                Log.printLine();
+                Log.printLine("Create Cloudlets");
+
+                List<Cloudlet> cloudletList = createCloudlet(brokerId, numberOfCloudlet);
+
+                Log.printLine("Sending them to broker...");
+
+                broker.submitVmList(vmList);
+                broker.submitCloudletList(cloudletList);
+
+                Log.printLine();
+                Log.printLine("Starts the simulation");
+
+                CloudSim.startSimulation();
+
+                Log.printLine();
+                Log.printLine("Results when simulation is over");
+
+                List<Cloudlet> cloudletReceivedList = broker.getCloudletReceivedList();
+                List<Vm> vmsCreatedList = broker.getVmsCreatedList();
+
+                CloudSim.stopSimulation();
+
+                printResult(cloudletReceivedList, brokerName);
+
+                Log.printLine();
+                Log.printLine("Simulation Complete");
             }
-            int brokerId = broker.getId();
 
-            Log.printLine();
-            Log.printLine("Fourth step: Create VMs");
-            Log.printLine("Enter number of vms:");
-            int numberOfVm = scanner.nextInt();
+            String leftAlignFormat = "| %-39s | %-15s | %-15s |%n";
 
-            List<Vm> vmList = createVM(brokerId, numberOfVm); 
-
-            Log.printLine();
-            Log.printLine("Fifth step: Create Cloudlets");
-            Log.printLine("Enter number of cloudlet");
-            int numberOfCloudlet = scanner.nextInt();
-
-            List<Cloudlet> cloudletList = createCloudlet(brokerId, numberOfCloudlet);
-            Log.printLine("Sending them to broker...");
-
-            broker.submitVmList(vmList);
-            broker.submitCloudletList(cloudletList);
-
-            Log.printLine();
-            Log.printLine("Sixth step: Starts the simulation");
-            Log.printLine("Press any key to continue...");
-            scanner.next();
-
-            CloudSim.startSimulation();
-
-            Log.printLine();
-            Log.printLine("Final step: Print results when simulation is over");
-            Log.printLine("Press any key to continue...");
-            scanner.next();
-
-            List<Cloudlet> cloudletReceivedList = broker.getCloudletReceivedList();
-            List<Vm> vmsCreatedList = broker.getVmsCreatedList();
-
-            CloudSim.stopSimulation();
-
-            printCloudletList(cloudletReceivedList);
-
-            Log.printLine();
-            Log.printLine("Simulation Complete");
+            System.out.format("+-----------------------------------------+-----------------+-----------------+%n");
+            System.out.format("| Broker                                  | Total CPU Time  | Average CPU Time|%n");
+            System.out.format("+-----------------------------------------+-----------------+-----------------+%n");
+            for (Map<String, String> result: results) {
+                System.out.format(leftAlignFormat, result.get("broker"), result.get("total_cpu_time"), result.get("average_cpu_time"));
+            }
+            System.out.format("+-----------------------------------------+-----------------+-----------------+%n");
         }
         catch (Exception e)
         {
@@ -246,7 +245,7 @@ public class LoadBalancer {
                 arch, os, vmm, hostList, time_zone, cost, costPerMem, costPerStorage, costPerBw);
 
 
-        // 6. Finally, we need to create a PowerDatacenter object.
+        // 6. Finally, we need to create a PowerDatacenter String.
         Datacenter datacenter = null;
         try {
             datacenter = new Datacenter(name, characteristics, new VmAllocationPolicySimple(hostList), storageList, 0);
@@ -258,31 +257,21 @@ public class LoadBalancer {
     }
 
     /**
-     * Prints the Cloudlet objects
+     * Prints the Cloudlet Strings
      * @param list  list of Cloudlets
      */
-    private static void printCloudletList(List<Cloudlet> list) {
+    private static void printResult(List<Cloudlet> list, String broker) {
 
-        String indent = "    ";
         Log.printLine();
         Log.printLine();
         Log.printLine("========================================== OUTPUT ==========================================");
-        Log.printLine("Cloudlet ID" + indent + "STATUS" + indent +
-                "Datacenter ID" + indent + "VM ID" + indent + " " + "Time" + indent + "Start Time" + indent + "Finish Time");
+        Log.printLine("Broker: " + broker);
+        
         double time = 0;
 
         for (Cloudlet value : list) {
-            Log.print(indent + String.format("%02d", value.getCloudletId()) + indent + indent);
-
             if (value.getCloudletStatus() == Cloudlet.SUCCESS) {
-                Log.print("SUCCESS");
-                time += (  value.getFinishTime() - value.getExecStartTime());
-
-                Log.printLine(indent + indent + String.format("%02d", value.getResourceId()) +
-                        indent + indent + indent + String.format("%02d", value.getVmId()) +
-                        indent + indent + String.format("%.2f", value.getActualCPUTime()) +
-                        indent + indent + String.format("%.2f", value.getExecStartTime()) +
-                        indent + indent + indent + String.format("%.2f", value.getFinishTime()));
+                time += value.getActualCPUTime();
             }
         }
 
@@ -290,6 +279,12 @@ public class LoadBalancer {
         Log.printLine("Total CPU Time: " + time);
         Log.printLine("Average CPU Time: " + avgTime);
 
+        Map<String, String> result = new HashMap<>();
+        result.put("broker", broker);
+        result.put("total_cpu_time", String.format("%.5f", time));
+        result.put("average_cpu_time", String.format("%.5f", avgTime));
+
+        results.add(result);
     }
 
 }
