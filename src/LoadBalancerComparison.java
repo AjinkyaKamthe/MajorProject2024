@@ -1,4 +1,7 @@
+import Priority.PriorityDatacenterBroker;
+import RoundRobin.RoundRobinDatacenterBroker;
 import SJF.sjf;
+import FCFS.firstComeFirstServe;
 
 import org.cloudbus.cloudsim.*;
 import org.cloudbus.cloudsim.core.CloudSim;
@@ -55,12 +58,12 @@ public class LoadBalancerComparison {
             Scanner scanner = new Scanner(System.in);
 
             Log.printLine();
-            Log.printLine("Initialize the CloudSim package.");
+            Log.printLine("Initializing the CloudSim package.");
             Log.printLine("Enter number of grid users:");
             int numUsers = scanner.nextInt();
 
             Log.printLine();
-            Log.printLine("Create Datacenters are the resource providers in CloudSim. We need at list one of them to run a CloudSim simulation.");
+            Log.printLine("Create Datacenters which are the resource providers in CloudSim. We need at least one of them to run a CloudSim simulation.");
             Log.printLine("Enter number of datacenters:");
             int numberOfDatacenters = scanner.nextInt();
 
@@ -70,21 +73,29 @@ public class LoadBalancerComparison {
             Log.printLine("Enter number of vms:");
             int numberOfVm = scanner.nextInt();
 
-            Log.printLine("Enter number of cloudlet");
+            Log.printLine("Enter number of cloudlets:");
             int numberOfCloudlet = scanner.nextInt();
 
-            for (int i = 1; i <= 5 ; i++) {
+            for (int i = 1; i <= 4 ; i++) {
                 CloudSim.init(numUsers, calendar, true);
 
                 DatacenterBroker broker = null;
                 try {
                     switch (i) {
                         case 1:
+                            broker = new RoundRobinDatacenterBroker("RoundRobinDatacenterBroker");
+                            break;
+                        case 2:
                             broker = new sjf("ShortestJobFirstDatacenterBroker");
                             break;
-                        
+                        case 3:
+                            broker = new PriorityDatacenterBroker("PriorityDatacenterBroker");
+                            break;
+                        case 4:
+                            broker = new firstComeFirstServe("FirstComeFirstServeDatacenterBroker");
+                            break;
                         default:
-                            Log.printLine("Please, select from [1] only:");
+                            Log.printLine("Please, select from [1-4] only:");
                             break;
                     }
                 } catch (Exception e) {
@@ -115,12 +126,11 @@ public class LoadBalancerComparison {
                 broker.submitCloudletList(cloudletList);
 
                 Log.printLine();
-                Log.printLine("Starts the simulation");
+                Log.printLine("Starting the simulation...");
 
                 CloudSim.startSimulation();
 
                 Log.printLine();
-                Log.printLine("Results when simulation is over");
 
                 List<Cloudlet> cloudletReceivedList = broker.getCloudletReceivedList();
                 List<Vm> vmsCreatedList = broker.getVmsCreatedList();
@@ -130,7 +140,7 @@ public class LoadBalancerComparison {
                 printResult(cloudletReceivedList, brokerName);
 
                 Log.printLine();
-                Log.printLine("Simulation Complete");
+                Log.printLine("Simulation Completed.");
             }
 
             String leftAlignFormat = "| %-39s | %-15s | %-15s |%n";

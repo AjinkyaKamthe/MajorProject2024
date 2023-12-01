@@ -1,4 +1,4 @@
-package FirstComeFirstServe;
+package FCFS;
 
 import org.cloudbus.cloudsim.Cloudlet;
 import org.cloudbus.cloudsim.DatacenterBroker;
@@ -8,9 +8,9 @@ import org.cloudbus.cloudsim.core.SimEvent;
 
 import java.util.ArrayList;
 
-public class FCFSDatacenterBroker extends DatacenterBroker {
+public class firstComeFirstServe extends DatacenterBroker {
 
-    public FCFSDatacenterBroker(String name) throws Exception {
+    public firstComeFirstServe(String name) throws Exception {
         super(name);
     }
 

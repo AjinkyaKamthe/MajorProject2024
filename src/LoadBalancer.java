@@ -1,6 +1,9 @@
 import java.util.*;
 
+import Priority.PriorityDatacenterBroker;
+import RoundRobin.RoundRobinDatacenterBroker;
 import SJF.sjf;
+import FCFS.firstComeFirstServe;
 
 import org.cloudbus.cloudsim.*;
 import org.cloudbus.cloudsim.core.CloudSim;
@@ -54,14 +57,14 @@ public class LoadBalancer {
             Scanner scanner = new Scanner(System.in);
 
             Log.printLine();
-            Log.printLine("First step: Initialize the CloudSim package.");
+            Log.printLine("Initialize the CloudSim package.");
             Log.printLine("Enter number of grid users:");
             int numUsers = scanner.nextInt();
             
             CloudSim.init(numUsers, calendar, false);
 
             Log.printLine();
-            Log.printLine("Second step: Create Datacenters are the resource providers in CloudSim. We need at list one of them to run a CloudSim simulation.");
+            Log.printLine("Create Datacenters which are the resource providers in CloudSim. We need at list one of them to run a CloudSim simulation.");
             Log.printLine("Enter number of datacenters:");
             int numberOfDatacenters = scanner.nextInt();
 
@@ -70,10 +73,12 @@ public class LoadBalancer {
             }
 
             Log.printLine();
-            Log.printLine("Third step: Create Broker");
+            Log.printLine("Create Broker");
             Log.printLine("Select method for LoadBalancing:" +
-                    
-                    "\n1. Shortest Job First" );
+                    "\n1. Round Robin" +
+                    "\n2. Shortest Job First" +
+                    "\n3. First Come First Serve" +
+                    "\n4. Priority");
 
             DatacenterBroker broker = null;
             boolean gotBroker = false;
@@ -83,12 +88,23 @@ public class LoadBalancer {
                 try {
                     switch (option) {
                         case 1 :
+                            broker = new RoundRobinDatacenterBroker("Broker");
+                            gotBroker = true;
+                            break;
+                        case 2 :
                             broker = new sjf("Broker");
                             gotBroker = true;
                             break;
-                        
+                        case 3 :
+                            broker = new firstComeFirstServe("Broker");
+                            gotBroker = true;
+                            break;
+                        case 4 :
+                            broker = new PriorityDatacenterBroker("Broker");
+                            gotBroker = true;
+                            break;
                         default:
-                            Log.printLine("Please, select from [1] only:");
+                            Log.printLine("Please, select from [1-4] only:");
                             break;
                     }
                 } catch (Exception e) {
@@ -98,15 +114,15 @@ public class LoadBalancer {
             int brokerId = broker.getId();
 
             Log.printLine();
-            Log.printLine("Fourth step: Create VMs");
+            Log.printLine("Create VMs");
             Log.printLine("Enter number of vms:");
             int numberOfVm = scanner.nextInt();
 
             List<Vm> vmList = createVM(brokerId, numberOfVm); 
 
             Log.printLine();
-            Log.printLine("Fifth step: Create Cloudlets");
-            Log.printLine("Enter number of cloudlet");
+            Log.printLine("Create Cloudlets");
+            Log.printLine("Enter number of cloudlet:");
             int numberOfCloudlet = scanner.nextInt();
 
             List<Cloudlet> cloudletList = createCloudlet(brokerId, numberOfCloudlet);
@@ -116,16 +132,9 @@ public class LoadBalancer {
             broker.submitCloudletList(cloudletList);
 
             Log.printLine();
-            Log.printLine("Sixth step: Starts the simulation");
-            Log.printLine("Press any key to continue...");
-            scanner.next();
+            Log.printLine("Starting the simulation...");
 
             CloudSim.startSimulation();
-
-            Log.printLine();
-            Log.printLine("Final step: Print results when simulation is over");
-            Log.printLine("Press any key to continue...");
-            scanner.next();
 
             List<Cloudlet> cloudletReceivedList = broker.getCloudletReceivedList();
             List<Vm> vmsCreatedList = broker.getVmsCreatedList();
@@ -135,7 +144,7 @@ public class LoadBalancer {
             printCloudletList(cloudletReceivedList);
 
             Log.printLine();
-            Log.printLine("Simulation Complete");
+            Log.printLine("Simulation Completed.");
         }
         catch (Exception e)
         {
