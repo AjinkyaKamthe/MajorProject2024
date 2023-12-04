@@ -3,6 +3,7 @@ import RoundRobin.RoundRobinDatacenterBroker;
 import SJF.sjf;
 import FCFS.firstComeFirstServe;
 
+import XAlgorithm.XAlgorithm;
 import org.cloudbus.cloudsim.*;
 import org.cloudbus.cloudsim.core.CloudSim;
 import org.cloudbus.cloudsim.provisioners.*;
@@ -16,15 +17,15 @@ public class LoadBalancerComparison {
     private static List<Vm> createVM(int userId, int numberOfVm) {
         
         LinkedList<Vm> list = new LinkedList<>();
-        long size = 10000; 
-        int ram = 512; 
+        long size = 1000;
+        int ram = 1024;
         int mips = 1000;
         long bw = 1000;
         int pesNumber = 1; 
-        String vmm = "Xen"; 
+        String vmm = "Xen";
 
-        for(int i = 0; i< numberOfVm; i++){
-            Vm vm = new Vm(i, userId, mips+(i*10), pesNumber, ram, bw, size, vmm, new CloudletSchedulerSpaceShared());
+        for(int i = 0; i < numberOfVm; i++){
+            Vm vm = new Vm(i, userId, mips+(i*10), pesNumber, ram + 1024, bw, size, vmm, new CloudletSchedulerSpaceShared());
             list.add(vm);
         }
 
@@ -34,8 +35,9 @@ public class LoadBalancerComparison {
     private static List<Cloudlet> createCloudlet(int userId, int numberOfCloudlet){
       
         LinkedList<Cloudlet> list = new LinkedList<>();
-
-        long length = 1000;
+        Random rand = new Random();
+        int randomNumber = rand.nextInt(501) + 1000;
+        long length = 10000;
         long fileSize = 300;
         long outputSize = 300;
         int pesNumber = 1;
@@ -59,24 +61,27 @@ public class LoadBalancerComparison {
 
             Log.printLine();
             Log.printLine("Initializing the CloudSim package.");
-            Log.printLine("Enter number of grid users:");
-            int numUsers = scanner.nextInt();
+            int numUsers = 1;
 
             Log.printLine();
             Log.printLine("Create Datacenters which are the resource providers in CloudSim. We need at least one of them to run a CloudSim simulation.");
             Log.printLine("Enter number of datacenters:");
-            int numberOfDatacenters = scanner.nextInt();
+            int numberOfDatacenters = 1;
+//                    scanner.nextInt();
 
             Log.printLine();
             Log.printLine("Create Broker:");
 
             Log.printLine("Enter number of vms:");
-            int numberOfVm = scanner.nextInt();
+            int numberOfVm = 3;
+//                    scanner.nextInt();
 
             Log.printLine("Enter number of cloudlets:");
-            int numberOfCloudlet = scanner.nextInt();
+            int numberOfCloudlet = 50;
 
-            for (int i = 1; i <= 4 ; i++) {
+            List<Double> weights = Arrays.asList(1.0, 2.0, 0.5);
+
+            for (int i = 1; i <= 5 ; i++) {
                 CloudSim.init(numUsers, calendar, true);
 
                 DatacenterBroker broker = null;
@@ -93,6 +98,9 @@ public class LoadBalancerComparison {
                             break;
                         case 4:
                             broker = new firstComeFirstServe("FirstComeFirstServeDatacenterBroker");
+                            break;
+                        case 5:
+                            broker = new XAlgorithm("XAlgorithm");
                             break;
                         default:
                             Log.printLine("Please, select from [1-4] only:");
@@ -148,6 +156,7 @@ public class LoadBalancerComparison {
             System.out.format("+-----------------------------------------+-----------------+-----------------+%n");
             System.out.format("| Broker                                  | Total CPU Time  | Average CPU Time|%n");
             System.out.format("+-----------------------------------------+-----------------+-----------------+%n");
+
             for (Map<String, String> result: results) {
                 System.out.format(leftAlignFormat, result.get("broker"), result.get("total_cpu_time"), result.get("average_cpu_time"));
             }
@@ -167,7 +176,6 @@ public class LoadBalancerComparison {
         List<Pe> peList1 = new ArrayList<>();
 
         int mips = 10000;
-
        
         peList1.add(new Pe(0, new PeProvisionerSimple(mips + 500))); 
         peList1.add(new Pe(1, new PeProvisionerSimple(mips + 1000)));
@@ -175,14 +183,8 @@ public class LoadBalancerComparison {
         peList1.add(new Pe(3, new PeProvisionerSimple(mips + 700)));
 
         
-        List<Pe> peList2 = new ArrayList<>();
-
-        peList2.add(new Pe(0, new PeProvisionerSimple(mips + 700)));
-        peList2.add(new Pe(1, new PeProvisionerSimple(mips + 900)));
-
-        
         int hostId=0;
-        int ram = 1002048; 
+        int ram = 12000;
         long storage = 1000000; 
         int bw = 10000;
 
@@ -197,18 +199,7 @@ public class LoadBalancerComparison {
                 )
         ); 
 
-        hostId++;
 
-        hostList.add(
-                new Host(
-                        hostId,
-                        new RamProvisionerSimple(ram),
-                        new BwProvisionerSimple(bw),
-                        storage,
-                        peList2,
-                        new VmSchedulerTimeShared(peList2)
-                )
-        ); 
         String arch = "x86";      
         String os = "Linux";          
         String vmm = "Xen";

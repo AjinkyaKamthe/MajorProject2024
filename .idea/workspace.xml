@@ -5,11 +5,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="8bf04ecd-7600-4ac4-b117-18fd049138e7" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/uiDesigner.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/Priority/PriorityDatacenterBroker.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Priority/priority.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/FCFS/firstComeFirstServe.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/FCFS/firstComeFirstServe.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/LoadBalancer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/LoadBalancer.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/LoadBalancerComparison.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/LoadBalancerComparison.java" afterDir="false" />
     </list>
@@ -35,6 +32,9 @@
   &quot;associatedIndex&quot;: 7
 }</component>
   <component name="ProjectId" id="2YodsFZgig3aU72OX5vbY7KLRG5" />
+  <component name="ProjectLevelVcsManager">
+    <ConfirmationsSetting value="1" id="Add" />
+  </component>
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
@@ -72,5 +72,15 @@
         </entry>
       </map>
     </option>
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <breakpoint enabled="true" type="java-exception">
+          <properties class="java.lang.ClassCastException" package="java.lang" />
+          <option name="timeStamp" value="1" />
+        </breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
 </project>

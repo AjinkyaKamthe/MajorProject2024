@@ -58,8 +58,7 @@ public class LoadBalancer {
 
             Log.printLine();
             Log.printLine("Initialize the CloudSim package.");
-            Log.printLine("Enter number of grid users:");
-            int numUsers = scanner.nextInt();
+            int numUsers = 1;
             
             CloudSim.init(numUsers, calendar, false);
 
