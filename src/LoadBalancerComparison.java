@@ -25,7 +25,7 @@ public class LoadBalancerComparison {
         String vmm = "Xen";
 
         for(int i = 0; i < numberOfVm; i++){
-            Vm vm = new Vm(i, userId, mips+(i*10), pesNumber, ram + 1024, bw, size, vmm, new CloudletSchedulerSpaceShared());
+            Vm vm = new Vm(i, userId, mips+(i*50), pesNumber, ram + 1024, bw, size, vmm, new CloudletSchedulerSpaceShared());
             list.add(vm);
         }
 
@@ -36,7 +36,6 @@ public class LoadBalancerComparison {
       
         LinkedList<Cloudlet> list = new LinkedList<>();
         Random rand = new Random();
-        int randomNumber = rand.nextInt(501) + 1000;
         long length = 10000;
         long fileSize = 300;
         long outputSize = 300;
@@ -44,7 +43,7 @@ public class LoadBalancerComparison {
         UtilizationModel utilizationModel = new UtilizationModelFull();
 
         for(int i = 0; i < numberOfCloudlet; i++){
-            Cloudlet cloudlet = new Cloudlet(i, (length + 2L * i * 10), pesNumber, fileSize, outputSize, utilizationModel, utilizationModel, utilizationModel);
+            Cloudlet cloudlet = new Cloudlet(i, (length + 2L *   i * 10), pesNumber, fileSize, outputSize, utilizationModel, utilizationModel, utilizationModel);
             cloudlet.setUserId(userId);
             list.add(cloudlet);
         }
@@ -66,20 +65,18 @@ public class LoadBalancerComparison {
             Log.printLine();
             Log.printLine("Create Datacenters which are the resource providers in CloudSim. We need at least one of them to run a CloudSim simulation.");
             Log.printLine("Enter number of datacenters:");
-            int numberOfDatacenters = 1;
+            int numberOfDatacenters = 5;
 //                    scanner.nextInt();
 
             Log.printLine();
             Log.printLine("Create Broker:");
 
             Log.printLine("Enter number of vms:");
-            int numberOfVm = 3;
+            int numberOfVm = 15;
 //                    scanner.nextInt();
 
             Log.printLine("Enter number of cloudlets:");
-            int numberOfCloudlet = 50;
-
-            List<Double> weights = Arrays.asList(1.0, 2.0, 0.5);
+            int numberOfCloudlet = 30000;
 
             for (int i = 1; i <= 5 ; i++) {
                 CloudSim.init(numUsers, calendar, true);

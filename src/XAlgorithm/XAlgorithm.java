@@ -15,61 +15,42 @@ public class XAlgorithm extends DatacenterBroker {
     }
 
     @Override
-    protected void processResourceCharacteristics(SimEvent ev) {
+    public void submitCloudletList(List<? extends Cloudlet> list) {
+        super.submitCloudletList(list);
 
-        DatacenterCharacteristics characteristics = (DatacenterCharacteristics) ev.getData();
-        getDatacenterCharacteristicsList().put(characteristics.getId(), characteristics);
-
-        if (getDatacenterCharacteristicsList().size() == getDatacenterIdsList().size()) {
-            distributeRequestsForNewVmsUsingWeightedRoundRobin();
-        }
-    }
-
-
-    @Override
-    protected void submitCloudlets() {
-        List<Vm> vmList = getVmsCreatedList();
-        List<Cloudlet> cloudlets = getCloudletList();
-        PriorityQueue<Vm> vmQueue = new PriorityQueue<>(
-                Comparator.comparingDouble(vm -> vm.getTotalUtilizationOfCpu(CloudSim.clock()))
-        );
-        PriorityQueue<Cloudlet> cloudletQueue = new PriorityQueue<>(
-                Comparator.comparingDouble(Cloudlet::getCloudletLength).reversed()
-        );
-        cloudletQueue.addAll(cloudlets);
-        vmQueue.addAll(vmList);
-
-        while (!cloudletQueue.isEmpty()) {
-            Cloudlet cloudlet = cloudletQueue.poll();
-            System.out.println(cloudlet.getCloudletLength());
-            Vm leastLoadedVm = vmQueue.poll();
+        for (Cloudlet cloudlet : getCloudletList()) {
+            Vm leastLoadedVm = getLeastLoadedVm();
             bindCloudletToVm(cloudlet.getCloudletId(), leastLoadedVm.getId());
-            sendNow(getVmsToDatacentersMap().get(leastLoadedVm.getId()), CloudSimTags.CLOUDLET_SUBMIT, cloudlet);
-            vmQueue.add(leastLoadedVm);
         }
     }
 
+    private Vm getLeastLoadedVm() {
+        List<Vm> vmList = getVmList();
 
-    protected void distributeRequestsForNewVmsUsingWeightedRoundRobin() {
-        int numberOfVmsAllocated = 0;
-        int i = 0;
+        Vm leastLoadedVm = vmList.get(0);
+        double minExpectedTime = getExpectedCompletionTime(leastLoadedVm);
 
-        final List<Integer> availableDatacenters = getDatacenterIdsList();
-
-        for (Vm vm : getVmList()) {
-            int datacenterId = availableDatacenters.get(i++ % availableDatacenters.size());
-            String datacenterName = CloudSim.getEntityName(datacenterId);
-
-            if (!getVmsToDatacentersMap().containsKey(vm.getId())) {
-                Log.printLine(CloudSim.clock() + ": " + getName() + ": " +
-                        "Trying to Create VM #" + vm.getId() + " in " + datacenterName);
-                sendNow(datacenterId, CloudSimTags.VM_CREATE_ACK, vm);
-                numberOfVmsAllocated++;
+        for (Vm vm : vmList) {
+            double expectedTime = getExpectedCompletionTime(vm);
+            if (expectedTime < minExpectedTime) {
+                minExpectedTime = expectedTime;
+                leastLoadedVm = vm;
             }
         }
 
-        setVmsRequested(numberOfVmsAllocated);
-        setVmsAcks(0);
+        return leastLoadedVm;
     }
 
+    private double getExpectedCompletionTime(Vm vm) {
+        double vmMips = vm.getMips();
+        double totalCloudletLength = 0;
+
+        for (Cloudlet cloudlet : getCloudletList()) {
+            if (cloudlet.getVmId() == vm.getId()) {
+                totalCloudletLength += cloudlet.getCloudletLength();
+            }
+        }
+
+        return totalCloudletLength / vmMips;
+    }
 }

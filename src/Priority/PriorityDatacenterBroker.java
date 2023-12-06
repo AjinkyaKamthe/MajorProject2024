@@ -36,7 +36,7 @@ public class PriorityDatacenterBroker extends DatacenterBroker {
             }
 
             for (int i = 0; i < getCloudletList().size(); i++) {
-                TimeUnit.SECONDS.sleep(2);
+//                TimeUnit.SECONDS.sleep(1);
                 priorityList.get(i).refreshTask();
             }
 
