@@ -35,7 +35,6 @@ public class LoadBalancerComparison {
     private static List<Cloudlet> createCloudlet(int userId, int numberOfCloudlet){
       
         LinkedList<Cloudlet> list = new LinkedList<>();
-        Random rand = new Random();
         long length = 10000;
         long fileSize = 300;
         long outputSize = 300;

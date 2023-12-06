@@ -53,4 +53,39 @@ public class XAlgorithm extends DatacenterBroker {
 
         return totalCloudletLength / vmMips;
     }
+
+    @Override
+    protected void processResourceCharacteristics(SimEvent ev) {
+//         Process datacenter characteristics as before
+        DatacenterCharacteristics characteristics = (DatacenterCharacteristics) ev.getData();
+        getDatacenterCharacteristicsList().put(characteristics.getId(), characteristics);
+
+        if (getDatacenterCharacteristicsList().size() == getDatacenterIdsList().size()) {
+            distributeRequestsForNewVmsUsingRoundRobin();
+        }
+    }
+
+    protected void distributeRequestsForNewVmsUsingRoundRobin() {
+        int numberOfVmsAllocated = 0;
+        int i = 0;
+
+        final List<Integer> availableDatacenters = getDatacenterIdsList();
+
+        for (Vm vm : getVmList()) {
+            int datacenterId = availableDatacenters.get(i++ % availableDatacenters.size());
+            String datacenterName = CloudSim.getEntityName(datacenterId);
+
+            if (!getVmsToDatacentersMap().containsKey(vm.getId())) {
+                Log.printLine(CloudSim.clock() + ": " + getName() + ": " +
+                        "Trying to Create VM #" + vm.getId() + " in " + datacenterName);
+                sendNow(datacenterId, CloudSimTags.VM_CREATE_ACK, vm);
+                numberOfVmsAllocated++;
+            }
+        }
+
+        setVmsRequested(numberOfVmsAllocated);
+        setVmsAcks(0);
+    }
+
+
 }
