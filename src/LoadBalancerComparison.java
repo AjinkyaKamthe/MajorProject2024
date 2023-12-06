@@ -149,6 +149,8 @@ public class LoadBalancerComparison {
 
             String leftAlignFormat = "| %-39s | %-15s | %-15s |%n";
 
+
+
             System.out.format("+-----------------------------------------+-----------------+-----------------+%n");
             System.out.format("| Broker                                  | Total CPU Time  | Average CPU Time|%n");
             System.out.format("+-----------------------------------------+-----------------+-----------------+%n");
@@ -157,6 +159,16 @@ public class LoadBalancerComparison {
                 System.out.format(leftAlignFormat, result.get("broker"), result.get("total_cpu_time"), result.get("average_cpu_time"));
             }
             System.out.format("+-----------------------------------------+-----------------+-----------------+%n");
+
+            String xtimeS = results.get(results.size()-1).get("total_cpu_time");
+            double xtime = Double.parseDouble(xtimeS);
+
+            String rrtimeS = results.get(0).get("total_cpu_time");
+            double rrtime = Double.parseDouble(rrtimeS);
+
+            double ans = (rrtime-xtime) / xtime * 100;
+            System.out.println("XAlgorithm is better than Round robin by " + ans + " %");
+
         }
         catch (Exception e)
         {
